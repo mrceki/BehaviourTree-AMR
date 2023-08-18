@@ -1,55 +1,97 @@
 #ifndef DOLLY_CLIENT_H
 #define DOLLY_CLIENT_H
 
-#include <dolly_pose_estimation/DollyPose.h>
+#include <behaviortree_cpp_v3/action_node.h>
+#include <ros/ros.h>
+#include <actionlib/client/simple_action_client.h>
+#include <dolly_pose_estimation/DollyPoseAction.h>
+#include <dolly_pose_estimation/DollyPoseFeedback.h>
 
-using std::string;
-
-class FindDolly : public BT::AsyncActionNode 
+class FindDolly : public BT::AsyncActionNode
 {
-public: 
-	FindDolly(const string& name, const BT::NodeConfiguration& config) 
-    : BT::AsyncActionNode(name, config)
-	{
-        
-        _client = _nh.serviceClient<dolly_pose_estimation::DollyPose>("/dolly_pose_estimation");
+public:
+    FindDolly(const std::string& name, const BT::NodeConfiguration& config)
+        : BT::AsyncActionNode(name, config),
+          _client("dolly_pose_estimation", true),
+          _success(false)
+    {
 
+    }
+
+    void feedbackCallback(const dolly_pose_estimation::DollyPoseFeedbackConstPtr &feedback)
+    {
+        _success = feedback->success;
+        if (_success)
+        {
+            setStatus(BT::NodeStatus::SUCCESS);
+        }
+        else
+        {
+            setStatus(BT::NodeStatus::FAILURE);
+        }
+    }
+
+    void activeCb()
+    {
+        ROS_INFO("Dolly Pose Estimation is active.");
+    }
+
+    void doneCb(const actionlib::SimpleClientGoalState& state,
+                const dolly_pose_estimation::DollyPoseResultConstPtr& result)
+    {
+        ROS_INFO("Dolly Pose Estimation is done.");
+        if (state == actionlib::SimpleClientGoalState::SUCCEEDED)
+        {
+            _success = result->success;
+        }
     }
 
     BT::NodeStatus tick() override
-	{   _scan_data = *(ros::topic::waitForMessage<sensor_msgs::LaserScan>("/scan", _nh));
-        _srv.request.scan_data = _scan_data;
-        if (_client.call(_srv)) 
+    {
+        if (!ros::ok())
         {
-            std::vector<geometry_msgs::Pose> dolly_positions = _srv.response.poses.poses;
-
-            // for (size_t i = 0; i < dolly_positions.size(); ++i) {
-            //     geometry_msgs::Pose pose = dolly_positions[i];
-            //     ROS_INFO("Dolly %zu: X = %f, Y = %f, Yaw = %f", i, pose.position.x, pose.position.y, pose.orientation.z); 
-            // }
-            geometry_msgs::Pose pose = dolly_positions[0];
-            Pose3D pose_goal = {pose.position.x, pose.position.y, pose.orientation.z};
-            setOutput<Pose3D>("goal",pose_goal);
-            return BT::NodeStatus::SUCCESS;
-        } 
-        
-        else 
-        {
-            ROS_ERROR("Service call failed");
             return BT::NodeStatus::FAILURE;
         }
+
+        ROS_WARN("Waiting for action server to start.");
+        _client.waitForServer(); // Will wait for infinite time
+
+        if (!_client.isServerConnected())
+        {
+            ROS_ERROR("Dolly Pose Estimation server is not connected.");
+            return BT::NodeStatus::FAILURE;
+        }
+
+        dolly_pose_estimation::DollyPoseGoal goal;
+        goal.cancel = false;
+
+        ROS_INFO("Sending empty goal to start Dolly Pose Estimation...");
+
+        _client.sendGoal(goal,
+                         boost::bind(&FindDolly::doneCb, this, _1, _2),
+                         boost::bind(&FindDolly::activeCb, this),
+                         boost::bind(&FindDolly::feedbackCallback, this, _1));
+
+        _client.waitForResult();
         
-	}
+        if (_client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+        {
+            return BT::NodeStatus::SUCCESS;
+        }
+        else
+        {
+            return BT::NodeStatus::FAILURE;
+        }
+    }
 
     static PortsList providedPorts()
     {
-      return {OutputPort<Pose3D>("goal")};
+        return {};
     }
 
 private:
-	ros::NodeHandle _nh;
-    ros::ServiceClient _client;
-	sensor_msgs::LaserScan _scan_data;
-    dolly_pose_estimation::DollyPose _srv;
+    actionlib::SimpleActionClient<dolly_pose_estimation::DollyPoseAction> _client;
+    bool _success;
 };
-#endif 
+
+#endif
