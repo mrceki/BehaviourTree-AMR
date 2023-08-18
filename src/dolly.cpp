@@ -5,7 +5,8 @@
 #include <behaviortree_cpp_v3/loggers/bt_zmq_publisher.h>
 #include "print_dolly.h"
 #include "dolly_client.h"
-
+#include "stop_dolly_client.h"
+#include "docking.h"
 
 using namespace BT;
 
@@ -35,9 +36,10 @@ int main(int argc, char** argv)
 
   BehaviorTreeFactory factory;
   factory.registerNodeType<FindDolly>("FindDolly");
-  factory.registerNodeType<PrintTarget>("PrintTarget");
+  factory.registerNodeType<AutoDockAction>("AutoDockAction");
+  factory.registerNodeType<StopDolly>("StopDolly");
 
-  auto tree = factory.createTreeFromFile("/home/cenk/Desktop/dolly.xml"); // auto tree = factory.createTreeFromText(xml_text);
+  auto tree = factory.createTreeFromFile("/home/cenk/Desktop/docking.xml"); // auto tree = factory.createTreeFromText(xml_text);
   StdCoutLogger logger_cout(tree);
 
   // This logger publish status changes using ZeroMQ. Used by Groot
