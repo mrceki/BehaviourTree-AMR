@@ -72,16 +72,6 @@ public:
                          boost::bind(&FindDolly::activeCb, this),
                          boost::bind(&FindDolly::feedbackCallback, this, _1));
 
-        _client.waitForResult();
-        
-        if (_client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-        {
-            return BT::NodeStatus::SUCCESS;
-        }
-        else
-        {
-            return BT::NodeStatus::FAILURE;
-        }
     }
 
     static PortsList providedPorts()
