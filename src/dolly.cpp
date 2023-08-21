@@ -7,22 +7,11 @@
 #include "dolly_client.h"
 #include "stop_dolly_client.h"
 #include "docking.h"
+#include "move_base_client.h"
 
 using namespace BT;
 
-// static const char* xml_text = R"(
 
-//  <root BTCPP_format="4" >
-//      <BehaviorTree ID="MainTree">
-//         <KeepRunningUntilFailure>
-//            <Sequence name="root">
-//                <FindDolly       goal="{GoalPosition}" />
-//                <PrintTarget     target="{GoalPosition}" />
-//            </Sequence>
-//         </KeepRunningUntilFailure>
-//      </BehaviorTree>
-//  </root>
-//  )";
 BehaviorTreeFactory factory;
 
 
@@ -38,6 +27,7 @@ int main(int argc, char** argv)
   factory.registerNodeType<FindDolly>("FindDolly");
   factory.registerNodeType<AutoDockAction>("AutoDockAction");
   factory.registerNodeType<StopDolly>("StopDolly");
+  factory.registerNodeType<MoveBase>("MoveBase");
 
   auto tree = factory.createTreeFromFile("/home/cenk/Desktop/docking.xml"); // auto tree = factory.createTreeFromText(xml_text);
   StdCoutLogger logger_cout(tree);
