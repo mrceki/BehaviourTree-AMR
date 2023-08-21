@@ -41,7 +41,7 @@ public:
         _client.sendGoal(goal);
         NodeStatus::RUNNING;
 
-        if (_client.waitForResult(ros::Duration(10.0))) {
+        if (_client.waitForResult(ros::Duration(80.0))) {
             if (_client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED) {
                 return NodeStatus::SUCCESS;
             } else {
