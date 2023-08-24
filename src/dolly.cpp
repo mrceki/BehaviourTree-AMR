@@ -9,6 +9,7 @@
 #include "docking.h"
 #include "move_base_client.h"
 #include "battery_check.h"
+#include "is_battery_charged.h"
 
 using namespace BT;
 
@@ -30,7 +31,7 @@ int main(int argc, char** argv)
   factory.registerNodeType<StopDolly>("StopDolly");
   factory.registerNodeType<MoveBase>("MoveBase");
   factory.registerNodeType<BatteryCheck>("BatteryCheck");
-
+  factory.registerNodeType<IsBatteryCharged>("IsBatteryCharged");
   auto tree = factory.createTreeFromFile("/home/cenk/Desktop/docking.xml"); // auto tree = factory.createTreeFromText(xml_text);
   StdCoutLogger logger_cout(tree);
 
