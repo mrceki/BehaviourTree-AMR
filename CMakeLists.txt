@@ -10,6 +10,7 @@ project(bt_amr)
 find_package(catkin REQUIRED COMPONENTS
   actionlib
   actionlib_msgs
+  autodock_core
   behaviortree_cpp_v3
   move_base_msgs
   roscpp
