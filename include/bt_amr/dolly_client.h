@@ -12,7 +12,7 @@ class FindDolly : public BT::AsyncActionNode
 public:
     FindDolly(const std::string& name, const BT::NodeConfiguration& config)
         : BT::AsyncActionNode(name, config),
-          _client("dolly_pose_estimation", true),
+          _client("dolly_pose_estimation_server", true),
           _success(false)
     {
 
@@ -72,6 +72,7 @@ public:
                          boost::bind(&FindDolly::activeCb, this),
                          boost::bind(&FindDolly::feedbackCallback, this, _1));
 
+        // return BT::NodeStatus::RUNNING;
     }
 
     static PortsList providedPorts()
