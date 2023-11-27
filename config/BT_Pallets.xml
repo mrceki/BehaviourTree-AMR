@@ -1,0 +1,12 @@
+<root>
+    <TreeNodesModel>
+        <Action ID="DollyDocking"/>
+        <Action ID="FindDolly">
+            <output_port type="Pose3D" name="goal"/>
+        </Action>
+        <Action ID="PrintTarget">
+            <input_port type="Pose3D" name="target">Simply print the target on console...</input_port>
+        </Action>
+    </TreeNodesModel>
+</root>
+

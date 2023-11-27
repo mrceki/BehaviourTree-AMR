@@ -1,0 +1,8 @@
+<launch>
+  <!-- Node name can be anything you want -->
+  <node name="bt_action_server" pkg="bt_amr" type="bt_action_server" output="screen">
+    <!-- Parameters -->
+    <param name="dolly_bt_tree" textfile="$(find bt_amr)/config/dolly_bt_tree.xml" />
+    <param name="charging_station_tree" textfile="$(find bt_amr)/config/charging_station_tree.xml" />
+  </node>
+</launch>
