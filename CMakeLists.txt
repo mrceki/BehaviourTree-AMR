@@ -37,12 +37,25 @@ include_directories(
 
 add_library(${PROJECT_NAME}
   src/bt_amr.cpp
+  src/docking.cpp
+  src/dolly_client.cpp
+  src/battery_check.cpp
+  src/is_battery_charged.cpp
+  src/move_base_client.cpp
+  src/stop_dolly_client.cpp
+  src/print_dolly.cpp
 )
 
 add_executable(bt_action_server src/bt_action_server.cpp)
 add_dependencies(bt_action_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(${PROJECT_NAME}
+  ${catkin_LIBRARIES}
+)
+
 target_link_libraries(bt_action_server
   ${catkin_LIBRARIES}
+  bt_amr
 )
 
 install(TARGETS ${PROJECT_NAME} bt_action_server

@@ -1,7 +1,6 @@
 #include <ros/ros.h>
 #include <ros/package.h> 
-#include <actionlib/server/simple_action_server.h>
-#include <bt_amr/TreeAction.h>
+#include <std_srvs/Trigger.h>
 #include <sensor_msgs/BatteryState.h>
 #include <behaviortree_cpp_v3/bt_factory.h>
 #include <behaviortree_cpp_v3/loggers/bt_cout_logger.h>
@@ -20,7 +19,7 @@ class BtAction
 {
 protected:
   ros::NodeHandle nh_;
-  actionlib::SimpleActionServer<bt_amr::TreeAction> as_;
+  ros::ServiceServer service_;
   std::string action_name_;
   std::string dolly_bt_tree, charging_station_tree;
   BehaviorTreeFactory factory;
@@ -29,7 +28,7 @@ protected:
 
 public:
   BtAction(std::string name) :
-    as_(nh_, name, boost::bind(&BtAction::executeCB, this, _1), false),
+    service_(nh_.advertiseService(name, &BtAction::trigger, this)),
     action_name_(name)
   {
     // Register custom node types
@@ -39,11 +38,9 @@ public:
     factory.registerNodeType<MoveBase>("MoveBase");
     factory.registerNodeType<BatteryCheck>("BatteryCheck");
     factory.registerNodeType<IsBatteryCharged>("IsBatteryCharged");
-
-    as_.start();
   }
 
-  void executeCB(const bt_amr::TreeGoalConstPtr &goal)
+  bool trigger(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res)
   {
     // Get the package path
     std::string package_path = ros::package::getPath("bt_amr");
@@ -65,12 +62,12 @@ public:
       if (msg->percentage < 0.1)
       {
         ROS_INFO("Battery is low, switching to tree 1");
-        tree = factory.createTreeFromFile(dolly_bt_tree);
+        tree = factory.createTreeFromFile(charging_station_tree);
       }
       else
       {
         ROS_INFO("Battery is high, switching to tree 2");
-        tree = factory.createTreeFromFile(charging_station_tree);
+        tree = factory.createTreeFromFile(dolly_bt_tree);
       }
 
       // Create loggers for the behavior tree
@@ -86,15 +83,9 @@ public:
     }
 
     // Do some work here...
-
-    // If the goal is achieved, call setSucceeded()
-    as_.setPreempted();
-  
-    // If the goal cannot be achieved, call setAborted()
-    // as_.setAborted();
-    
-    // If the goal is preempted (cancelled), call setPreempted()
-    // as_.setPreempted();
+    ROS_INFO("Done with BT");
+    res.success = true;
+    return true;
   }
 
   void batteryCallback(const sensor_msgs::BatteryState::ConstPtr& msg)
@@ -124,9 +115,9 @@ public:
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "bt_action");
+  ros::init(argc, argv, "fake_docking_server");
   
-  BtAction bt_action("bt_action");
+  BtAction bt_action("fake_docking_server");
   ros::spin();
 
   return 0;
