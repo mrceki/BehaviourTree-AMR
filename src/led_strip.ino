@@ -1,12 +1,12 @@
-#define USE_HWCDC // For ESP32-S3
+#define USE_USBCDC // For ESP32-S3
 
 #include <ros.h>
 #include <std_msgs/Int32.h>
 #include "FastLED.h"
 
 #define NUM_LEDS 100
-#define LED_PIN D10
-#define BRIGHTNESS 50
+#define LED_PIN D2
+#define BRIGHTNESS 30 
 
 CRGB leds[NUM_LEDS];
 ros::NodeHandle nh;
@@ -21,7 +21,7 @@ void light_msg_subCB(const std_msgs::Int32& msg) {
   }
 }
 
-ros::Subscriber<std_msgs::Int32> light_msg_sub("toggle_led", light_msg_subCB);
+ros::Subscriber<std_msgs::Int32> light_msg_sub("led_status", light_msg_subCB);
 
 void changeMode(int mode) {
   if (currentMode != mode) {
@@ -45,7 +45,16 @@ void switchMode(int mode) {
       warningMode();
       break;
     case 3:
-      runningMode(0, 255, 0, 10);
+      goingForward(0, 255, 0, 10);
+      break;
+    case 4:
+      goingBackward(0, 255, 0, 10);
+      break;
+    case 5:
+      turningRight(0, 255, 0, 10);
+      break;
+    case 6:
+      turningLeft(0, 255, 0, 10);
       break;
   }
 }
@@ -55,7 +64,7 @@ void loop() {
   switchMode(currentMode);
 }
 
-void runningMode(byte red, byte green, byte blue, int WaveDelay) {
+void goingForward(byte red, byte green, byte blue, int WaveDelay) {
   int Position = 0;
   for (int j = 0; j < NUM_LEDS; j++) {
     Position++;
@@ -76,6 +85,60 @@ void runningMode(byte red, byte green, byte blue, int WaveDelay) {
   }
 }
 
+void goingBackward(byte red, byte green, byte blue, int WaveDelay) {
+  int Position = NUM_LEDS;
+  for (int j = NUM_LEDS - 1; j >= 0; j--) {
+    Position--;
+
+    for (int i = NUM_LEDS - 1; i >= 0; i--) {
+      if (i < NUM_LEDS / 2) {
+        setPixel(i, 0, ((sin((Position + i) / 4) * 105 + 150) / 255) * green, 0);
+      } else {
+        setPixel(i, 0, ((sin((Position - i) / 4) * 105 + 150) / 255) * green, 0);
+      }
+    }
+    showStrip();
+    delay(WaveDelay);
+    nh.spinOnce();
+    if (currentMode != 4) {
+      break;
+    }
+  }
+}
+
+void turningRight(byte red, byte green, byte blue, int WaveDelay){
+  int Position = 0;
+  for (int j = 0; j < NUM_LEDS; j++) {
+    Position++;
+
+    for (int i = 0; i < NUM_LEDS; i++) {
+      setPixel(i, 0, ((sin((i + Position) / 1) * 105 + 150) / 255) * green, 0);
+    }
+    showStrip();
+    delay(WaveDelay);
+    nh.spinOnce();
+    if (currentMode != 5) {
+      break;
+    }
+  }
+}
+
+void turningLeft(byte red, byte green, byte blue, int WaveDelay){
+  int Position = 0;
+  for (int j = 0; j < NUM_LEDS; j++) {
+    Position++;
+
+    for (int i = 0; i < NUM_LEDS; i++) {
+      setPixel(i, 0, ((sin((i - Position) / 1) * 105 + 150) / 255) * green, 0);
+    }
+    showStrip();
+    delay(WaveDelay);
+    nh.spinOnce();
+    if (currentMode != 6) {
+      break;
+    }
+  }
+}
 void fadeInOut(int firstCounter, int lastCounter, int multiplier, bool colors[], int stepDelay, int mode){
   // Fade IN
   for (int k = firstCounter; k < lastCounter; k++) {
@@ -112,7 +175,7 @@ void taskMode() {
   fadeInOut(30, 128, 2, colors, 1, 1);
 }
 
-void warningMode() {
+void warningMode()  {
   bool colors[3] = {1,0,0};
   fadeInOut(20, 84, 3, colors, 1, 2);
 }

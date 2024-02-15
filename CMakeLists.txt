@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib_msgs
   autodock_core
   behaviortree_cpp_v3
+  hamal_custom_interfaces
   move_base_msgs
   roscpp
   dolly_pose_estimation
@@ -27,7 +28,8 @@ generate_messages(
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES bt_amr
-   CATKIN_DEPENDS std_msgs actionlib actionlib_msgs behaviortree_cpp_v3 roscpp dolly_pose_estimation autodock_core
+   CATKIN_DEPENDS std_msgs actionlib actionlib_msgs behaviortree_cpp_v3
+    roscpp dolly_pose_estimation autodock_core hamal_custom_interfaces
 )
 
 include_directories(
@@ -44,6 +46,8 @@ add_library(${PROJECT_NAME}
   src/move_base_client.cpp
   src/stop_dolly_client.cpp
   src/print_dolly.cpp
+  src/lifter_controller.cpp
+  src/lifter_position_controller.cpp
 )
 
 add_executable(bt_action_server src/bt_action_server.cpp)

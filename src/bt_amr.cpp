@@ -10,6 +10,8 @@
 #include "bt_amr/move_base_client.h"
 #include "bt_amr/battery_check.h"
 #include "bt_amr/is_battery_charged.h"
+#include "bt_amr/lifter_controller.h"
+#include "bt_amr/lifter_position_controller.h"
 
 using namespace BT;
 
@@ -32,7 +34,9 @@ int main(int argc, char** argv)
   factory.registerNodeType<MoveBase>("MoveBase");
   factory.registerNodeType<BatteryCheck>("BatteryCheck");
   factory.registerNodeType<IsBatteryCharged>("IsBatteryCharged");
-  auto tree = factory.createTreeFromFile("/home/cenk/Desktop/docking.xml"); // auto tree = factory.createTreeFromText(xml_text);
+  factory.registerNodeType<LifterController>("LifterController");
+  factory.registerNodeType<LifterPositionController>("LifterPositionController");
+  auto tree = factory.createTreeFromFile("/home/cenk/Desktop/lifter.xml"); // auto tree = factory.createTreeFromText(xml_text);
   StdCoutLogger logger_cout(tree);
 
   // This logger publish status changes using ZeroMQ. Used by Groot

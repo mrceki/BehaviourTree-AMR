@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<root main_tree_to_execute="BehaviorTree">
+    <!-- ////////// -->
+    <BehaviorTree ID="BehaviorTree">
+        <Sequence>
+            <Action ID="LifterPositionController" position="260"/>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <TreeNodesModel>
+        <Action ID="AutoDockAction"/>
+        <Condition ID="BatteryCheck"/>
+        <Action ID="FindDolly"/>
+        <Condition ID="IsBatteryCharged"/>
+        <Action ID="LifterController">
+            <input_port name="target"/>
+        </Action>
+        <Action ID="LifterPositionController">
+            <input_port name="position"/>
+        </Action>
+        <Action ID="MoveBase">
+            <input_port name="goal"/>
+        </Action>
+        <Action ID="StopDolly"/>
+    </TreeNodesModel>
+    <!-- ////////// -->
+</root>

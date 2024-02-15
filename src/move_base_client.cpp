@@ -19,7 +19,17 @@ BT::NodeStatus MoveBase::tick()
     std::cout << "Sending the robot to: " << text.value() << std::endl;
 
     Pose2D goal;
-    if (text.value() == "dolly_0") {
+    if (text.value() == "Goal_a"){
+
+      std::string goal_a = "-1.34;2.6;0.0;1.0";
+      auto parts = BT::splitString(goal_a, ';');
+      goal.x     = -1.34;
+      goal.y     = 2.6;
+      goal.quaternion_z = 0.0;
+      goal.quaternion_w = 1.0;       
+    }
+
+    else if (text.value() == "dolly_0") {
         // Set goal_a values
     } else if (text.value() == "dolly_1") {
         // Set goal_b values
